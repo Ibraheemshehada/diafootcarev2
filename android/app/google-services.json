@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829087142636",
+    "project_id": "diafootcare-21be7",
+    "storage_bucket": "diafootcare-21be7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829087142636:android:6e1a20374f9e1b8a0c8bc9",
+        "android_client_info": {
+          "package_name": "com.example.diafootcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh5AKS0QPmVXZMb2xgFCBluzbsfYW-ecQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
