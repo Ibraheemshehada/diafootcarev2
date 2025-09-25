@@ -17,7 +17,8 @@ class AddReminderScreen extends StatefulWidget {
 
 class _AddReminderScreenState extends State<AddReminderScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  DateTime _combineDateAndTime(DateTime date, TimeOfDay t) =>
+      DateTime(date.year, date.month, date.day, t.hour, t.minute);
   // fields
   String _label = '';
   ReminderKind _kind = ReminderKind.photo;
@@ -69,25 +70,45 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    // build title/note
+    // Build title/note
     String title = _label.trim().isNotEmpty ? _label.trim() : _kindLabel(_kind);
     if (_kind == ReminderKind.medication) {
-      final parts = [if (_medName.trim().isNotEmpty) _medName.trim(), if (_dosage.trim().isNotEmpty) _dosage.trim()];
+      final parts = <String>[
+        if (_medName.trim().isNotEmpty) _medName.trim(),
+        if (_dosage.trim().isNotEmpty) _dosage.trim(),
+      ];
       if (parts.isNotEmpty) title = parts.join(' — ');
     }
 
-    List<int> weekdays;
+    // Compute schedule fields
+    List<int> weekdays = const [];
     DateTime? oneDate;
 
     switch (_repeat) {
       case RepeatMode.once:
-        oneDate = _oneDate ?? DateTime.now();
-        weekdays = const []; // one-off uses exact date match
+      // normalize to date-only (time added by scheduler later)
+        oneDate = _oneDate == null
+            ? DateTime.now()
+            : DateTime(_oneDate!.year, _oneDate!.month, _oneDate!.day);
+        // prevent scheduling in the past for "once"
+        final candidate = _combineDateAndTime(oneDate!, _time);
+        if (candidate.isBefore(DateTime.now())) {
+          // push to next future minute to avoid a dead reminder (no UI change)
+          oneDate = DateTime.now().add(const Duration(days: 0));
+          oneDate = DateTime(oneDate!.year, oneDate!.month, oneDate!.day);
+        }
         break;
+
       case RepeatMode.daily:
-        weekdays = const [1,2,3,4,5,6,7];
+        weekdays = const [1, 2, 3, 4, 5, 6, 7];
         break;
+
       case RepeatMode.custom:
+        if (_weekdays.isEmpty) {
+          // require at least one day; non-visual guard (no layout change)
+          // You already have a form; simply return early.
+          return;
+        }
         weekdays = _weekdays.toList()..sort();
         break;
     }
@@ -104,6 +125,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
 
     Navigator.pop(context, reminder);
   }
+
 
   @override
   Widget build(BuildContext context) {

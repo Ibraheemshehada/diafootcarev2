@@ -1,13 +1,12 @@
-
 import 'package:flutter/material.dart';
 
 class Reminder {
   final String id;
   final TimeOfDay time;
-  final String title;      // e.g., "Glucophage 500mg" or user label
-  final String note;       // e.g., "Medication", "Wound Care" etc.
-  final List<int> weekdays; // 1..7 (Mon..Sun). Empty if one-off.
-  final DateTime? oneOffDate; // specific calendar date (local)
+  final String title;
+  final String note;
+  final List<int> weekdays;   // 1..7, empty if one-off
+  final DateTime? oneOffDate; // local date only (00:00)
   bool enabled;
 
   Reminder({
@@ -22,4 +21,29 @@ class Reminder {
 
   bool repeatsDaily() => oneOffDate == null && weekdays.length == 7;
   bool isOneOff() => oneOffDate != null;
+
+  factory Reminder.fromJson(Map<String, dynamic> m) => Reminder(
+    id: m['id'] as String,
+    time: TimeOfDay(hour: m['h'] as int, minute: m['m'] as int),
+    title: m['title'] as String,
+    note: m['note'] as String,
+    weekdays: (m['wd'] as List).cast<int>(),
+    oneOffDate:
+    m['od'] == null ? null : DateTime.parse(m['od'] as String),
+    enabled: (m['en'] as bool?) ?? true,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'h': time.hour,
+    'm': time.minute,
+    'title': title,
+    'note': note,
+    'wd': weekdays,
+    'od': oneOffDate == null
+        ? null
+        : DateTime(oneOffDate!.year, oneOffDate!.month, oneOffDate!.day)
+        .toIso8601String(),
+    'en': enabled,
+  };
 }

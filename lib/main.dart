@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:firebase_core/firebase_core.dart';
+import 'core/services/notification_service.dart';
 import 'firebase_options.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -18,7 +19,7 @@ void main() async {
     databaseFactory = databaseFactoryFfiWeb;
     debugPrint('✅ sqflite web factory initialized');
   }
-
+  await NotificationService.I.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
 
