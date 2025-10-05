@@ -11,10 +11,39 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import 'app.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+Future<void> requestNotificationPermission() async {
+  final status = await Permission.notification.request();
+  if (status.isGranted) {
+    debugPrint("✅ Notifications permission granted");
+  } else {
+    debugPrint("❌ Notifications permission denied");
+  }
+}
+Future<void> requestCameraPermission() async {
+  final status = await Permission.camera.request();
+  if (status.isGranted) {
+    debugPrint("✅ Camera permission granted");
+  } else {
+    debugPrint("❌ Camera permission denied");
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text(
+            details.exceptionAsString(),
+            style: TextStyle(color: Colors.red, fontSize: 16),
+          ),
+        ),
+      ),
+    );
+  };
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb;
     debugPrint('✅ sqflite web factory initialized');
@@ -23,6 +52,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
 
+  await requestNotificationPermission();
+  await requestCameraPermission();
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
