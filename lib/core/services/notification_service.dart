@@ -15,36 +15,78 @@ class NotificationService {
 
   /// MUST be called once (e.g., in main()).
   Future<void> init() async {
-    if (_ready) return;
-    // tz init (use device local zone)
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
+    // if (_ready) return;
+    // // tz init (use device local zone)
+    // tz.initializeTimeZones();
+    // tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
+    //
+    // const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // const iosInit = DarwinInitializationSettings(
+    //   requestAlertPermission: true,
+    //   requestBadgePermission: true,
+    //   requestSoundPermission: true,
+    // );
+    //
+    // await _plugin.initialize(
+    //   const InitializationSettings(android: androidInit, iOS: iosInit),
+    // );
+    //
+    // if (Platform.isAndroid) {
+    //   const AndroidNotificationChannel ch = AndroidNotificationChannel(
+    //     'reminders_channel',
+    //     'Reminders',
+    //     description: 'DiaFootCare reminders',
+    //     importance: Importance.max,
+    //   );
+    //   await _plugin
+    //       .resolvePlatformSpecificImplementation<
+    //       AndroidFlutterLocalNotificationsPlugin>()
+    //       ?.createNotificationChannel(ch);
+    // }
+    //
+    // _ready = true;
+    Future<void> init() async {
+      if (_ready) return;
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      // ✅ Initialize tz database
+      tz.initializeTimeZones();
 
-    await _plugin.initialize(
-      const InitializationSettings(android: androidInit, iOS: iosInit),
-    );
+      // ✅ Use a valid, real timezone name
+      // For Gaza, Jerusalem, or nearby regions, use 'Asia/Jerusalem'
+      try {
+        tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+      } catch (e) {
+        // Fallback to UTC if anything goes wrong
+        tz.setLocalLocation(tz.getLocation('UTC'));
+      }
 
-    if (Platform.isAndroid) {
-      const AndroidNotificationChannel ch = AndroidNotificationChannel(
-        'reminders_channel',
-        'Reminders',
-        description: 'DiaFootCare reminders',
-        importance: Importance.max,
+      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosInit = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
       );
-      await _plugin
-          .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(ch);
+
+      await _plugin.initialize(
+        const InitializationSettings(android: androidInit, iOS: iosInit),
+      );
+
+      if (Platform.isAndroid) {
+        const AndroidNotificationChannel ch = AndroidNotificationChannel(
+          'reminders_channel',
+          'Reminders',
+          description: 'DiaFootCare reminders',
+          importance: Importance.max,
+        );
+        await _plugin
+            .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(ch);
+      }
+
+      _ready = true;
     }
 
-    _ready = true;
   }
 
   /// Map your string id to a stable int for the system.
